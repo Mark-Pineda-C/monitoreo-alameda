@@ -33,7 +33,7 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
   } = useMutation({
     mutationKey: ["access-camera"],
     mutationFn: async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       const video = document.getElementById("camera") as HTMLVideoElement;
       video.srcObject = stream;
     },
