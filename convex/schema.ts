@@ -12,11 +12,11 @@ export default defineSchema({
         name: v.optional(v.string()),
         plate: v.string(),
         is_guest: v.boolean(),
-        photo: v.id("_storage"),
+        photo: v.optional(v.id("_storage")),
       }),
     ),
     latest_update: v.optional(v.number()),
-    department: v.optional(v.string()),
+    department: v.optional(v.number()),
     defined_client: v.optional(v.id("clients")),
     status: v.optional(v.union(v.literal("PARKED"), v.literal("EMPTY"))),
   })
@@ -31,7 +31,9 @@ export default defineSchema({
   }).index("by_plate", ["plate"]),
   parking_history: defineTable({
     parking_lot: v.id("parking_lot"),
+    parking_lot_number: v.string(),
     plate: v.string(),
+    owner: v.string(),
     type: v.union(v.literal("ENTRY"), v.literal("EXIT")),
   }),
   users: defineTable({
@@ -43,6 +45,7 @@ export default defineSchema({
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.float64()),
     userName: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("ADMIN"), v.literal("USER"))),
   })
     .index("email", ["email"])
     .index("phone", ["phone"]),
