@@ -24,7 +24,11 @@ export const setParkingLotStatus = mutation({
     if (!lot) {
       throw new Error("Parking lot not found");
     }
+    if (lot.current?.photo && args.photo) {
+      await ctx.storage.delete(lot.current.photo);
+    }
     const setLog = args.status !== lot.status;
+
     await ctx.db.patch(args.lot_id, {
       current: {
         is_guest: false,
