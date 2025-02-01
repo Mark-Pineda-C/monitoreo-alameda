@@ -15,7 +15,7 @@ export function Header() {
   return (
     <header className="flex justify-between items-center p-4">
       <button type="button" onClick={() => navigation.setState(() => ({ page: "home" }))}>
-        <Logo /> <span>v0.0.1</span>
+        <Logo />
       </button>
       {isLoading ? (
         <Spinner size="sm" classNames={{ circle1: "border-b-emerald-500", circle2: "border-b-emerald-500" }} />
