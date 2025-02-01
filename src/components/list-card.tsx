@@ -20,6 +20,18 @@ import { api } from "../../convex/_generated/api";
 import toast from "react-hot-toast";
 import { useState } from "react";
 
+declare class ImageCapture {
+  constructor(videoTrack?: MediaStreamTrack);
+  takePhoto(photoSettings?: PhotoSettings): Promise<Blob>;
+}
+
+type PhotoSettings = {
+  fillLightMode?: "auto" | "off" | "flash";
+  imageHeight?: number;
+  imageWidth?: number;
+  redEyeReduction?: boolean;
+};
+
 export function ListCard({ type, status, number, _id, current }: Doc<"parking_lot">) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
 
@@ -30,12 +42,15 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
     mutate: activateCamera,
     isPending: isCameraLoading,
     isSuccess: isCameraLoaded,
+    data: stream,
   } = useMutation({
     mutationKey: ["access-camera"],
     mutationFn: async () => {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       const video = document.getElementById("camera") as HTMLVideoElement;
       video.srcObject = stream;
+
+      return stream;
     },
   });
 
@@ -47,6 +62,22 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
     },
     onError: () => {
       toast.error("Error al registrar vehículo");
+    },
+  });
+
+  const {
+    mutate: takePhoto,
+    isPending: isPhotoLoading,
+    data: photoData,
+  } = useMutation({
+    mutationKey: ["take-photo"],
+    mutationFn: async () => {
+      const frame = stream?.getVideoTracks()[0];
+      const capture = new ImageCapture(frame);
+      const blob = await capture.takePhoto();
+      const file = new File([blob], `${_id}.jpg`, { type: "image/jpeg" });
+
+      return { file, image: URL.createObjectURL(blob) };
     },
   });
 
@@ -82,6 +113,21 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                   }}
                 >
                   <CardBody className="grid place-items-center relative" id="camera-container">
+                    {isPhotoLoading && (
+                      <div className="absolute inset-0 grid place-items-center bg-black/50">
+                        <Spinner
+                          size="lg"
+                          classNames={{ circle1: "border-b-emerald-500", circle2: "border-b-emerald-500" }}
+                        />
+                      </div>
+                    )}
+                    {photoData && (
+                      <img
+                        src={photoData.image}
+                        alt="Foto del vehículo"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
                     <video
                       id="camera"
                       className={`absolute inset-0 w-full h-full object-cover duration-300 ${isCameraLoaded ? "opacity-100" : "opacity-0"}`}
