@@ -20,17 +20,17 @@ import { api } from "../../convex/_generated/api";
 import toast from "react-hot-toast";
 import { useState } from "react";
 
-declare class ImageCapture {
-  constructor(videoTrack?: MediaStreamTrack);
-  takePhoto(photoSettings?: PhotoSettings): Promise<Blob>;
-}
+// declare class ImageCapture {
+//   constructor(videoTrack?: MediaStreamTrack);
+//   takePhoto(photoSettings?: PhotoSettings): Promise<Blob>;
+// }
 
-type PhotoSettings = {
-  fillLightMode?: "auto" | "off" | "flash";
-  imageHeight?: number;
-  imageWidth?: number;
-  redEyeReduction?: boolean;
-};
+// type PhotoSettings = {
+//   fillLightMode?: "auto" | "off" | "flash";
+//   imageHeight?: number;
+//   imageWidth?: number;
+//   redEyeReduction?: boolean;
+// };
 
 export function ListCard({ type, status, number, _id, current }: Doc<"parking_lot">) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -63,30 +63,30 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
     },
   });
 
-  const {
-    mutate: takePhoto,
-    isPending: isPhotoLoading,
-    data: photoData,
-  } = useMutation({
-    mutationKey: ["take-photo"],
-    mutationFn: async () => {
-      try {
-        const frame = data?.getVideoTracks()[0];
+  // const {
+  //   mutate: takePhoto,
+  //   isPending: isPhotoLoading,
+  //   data: photoData,
+  // } = useMutation({
+  //   mutationKey: ["take-photo"],
+  //   mutationFn: async () => {
+  //     try {
+  //       const frame = data?.getVideoTracks()[0];
 
-        const capture = new ImageCapture(frame);
-        const blob = await capture.takePhoto();
-        const file = new File([blob], `${_id}.jpg`, { type: "image/jpeg" });
+  //       const capture = new ImageCapture(frame);
+  //       const blob = await capture.takePhoto();
+  //       const file = new File([blob], `${_id}.jpg`, { type: "image/jpeg" });
 
-        return { file, image: URL.createObjectURL(blob) };
-      } catch (error) {
-        throw error;
-      }
-    },
-    onError: (error) => {
-      console.log(error);
-      toast.error("Error al tomar la foto");
-    },
-  });
+  //       return { file, image: URL.createObjectURL(blob) };
+  //     } catch (error) {
+  //       throw error;
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     console.log(error);
+  //     toast.error("Error al tomar la foto");
+  //   },
+  // });
 
   const { mutate: setParkingLotStatus, isPending: isParkingLotStatusLoading } = useMutation({
     mutationFn: useConvexMutation(api.parking_lots.setParkingLotStatus),
@@ -127,13 +127,14 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                   onPress={() => {
                     if (!isCameraLoaded) {
                       activateCamera();
-                    } else {
-                      takePhoto();
                     }
+                    // else {
+                    //   takePhoto();
+                    // }
                   }}
                 >
                   <CardBody className="grid place-items-center relative" id="camera-container">
-                    {isPhotoLoading && (
+                    {/* {isPhotoLoading && (
                       <div className="absolute inset-0 grid place-items-center bg-black/50">
                         <Spinner
                           size="lg"
@@ -147,7 +148,7 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                         alt="Foto del vehículo"
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                    )}
+                    )} */}
                     <video
                       id="camera"
                       className={`absolute inset-0 w-full h-full object-cover duration-300 ${isCameraLoaded ? "opacity-100" : "opacity-0"}`}
