@@ -109,12 +109,14 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                   onPress={() => {
                     if (!isCameraLoaded) {
                       activateCamera();
+                    } else {
+                      takePhoto();
                     }
                   }}
                 >
                   <CardBody className="grid place-items-center relative" id="camera-container">
                     {isPhotoLoading && (
-                      <div className="absolute inset-0 grid place-items-center bg-black/50">
+                      <div className="absolute inset-0 grid place-items-center bg-black/50 z-20">
                         <Spinner
                           size="lg"
                           classNames={{ circle1: "border-b-emerald-500", circle2: "border-b-emerald-500" }}
@@ -125,7 +127,7 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                       <img
                         src={photoData.image}
                         alt="Foto del vehículo"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover z-30"
                       />
                     )}
                     <video
