@@ -88,7 +88,7 @@ export function SignIn() {
           <p className="text-foreground/80 mt-2">Inicia sesión para continuar</p>
         </CardHeader>
         <CardBody className="space-y-4 p-0 overflow-visible">
-          <input type="hidden" name="flow" value="signUp" />
+          <input type="hidden" name="flow" value="signIn" />
           <Input
             classNames={{
               inputWrapper: "after:bg-gradient-to-r after:from-emerald-400 after:to-teal-600",
