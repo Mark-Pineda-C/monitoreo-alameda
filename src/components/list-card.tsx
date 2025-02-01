@@ -19,7 +19,18 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "../../convex/_generated/api";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import { ImageCapture } from "../lib/image-capture";
+
+declare class ImageCapture {
+  constructor(videoTrack?: MediaStreamTrack);
+  takePhoto(photoSettings?: PhotoSettings): Promise<Blob>;
+}
+
+type PhotoSettings = {
+  fillLightMode?: "auto" | "off" | "flash";
+  imageHeight?: number;
+  imageWidth?: number;
+  redEyeReduction?: boolean;
+};
 
 export function ListCard({ type, status, number, _id, current }: Doc<"parking_lot">) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
