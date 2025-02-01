@@ -19,6 +19,7 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "../../convex/_generated/api";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { ImageCapture } from "../lib/image-capture";
 
 export function ListCard({ type, status, number, _id, current }: Doc<"parking_lot">) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -27,15 +28,52 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
   const [owner, setOwner] = useState(current ? current.name : "");
 
   const {
+    data,
     mutate: activateCamera,
     isPending: isCameraLoading,
     isSuccess: isCameraLoaded,
   } = useMutation({
     mutationKey: ["access-camera"],
     mutationFn: async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-      const video = document.getElementById("camera") as HTMLVideoElement;
-      video.srcObject = stream;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const video = document.getElementById("camera") as HTMLVideoElement;
+        video.srcObject = stream;
+
+        return stream;
+      } catch (err) {
+        console.log(err);
+        throw err;
+      }
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("Error al acceder a la cámara");
+    },
+  });
+
+  const {
+    mutate: takePhoto,
+    isPending: isPhotoLoading,
+    data: photoData,
+  } = useMutation({
+    mutationKey: ["take-photo"],
+    mutationFn: async () => {
+      try {
+        const frame = data?.getVideoTracks()[0];
+
+        const capture = new ImageCapture(frame);
+        const blob = await capture.takePhoto();
+        const file = new File([blob], `${_id}.jpg`, { type: "image/jpeg" });
+
+        return { file, image: URL.createObjectURL(blob) };
+      } catch (error) {
+        throw error;
+      }
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error("Error al tomar la foto");
     },
   });
 
@@ -78,10 +116,27 @@ export function ListCard({ type, status, number, _id, current }: Doc<"parking_lo
                   onPress={() => {
                     if (!isCameraLoaded) {
                       activateCamera();
+                    } else {
+                      takePhoto();
                     }
                   }}
                 >
                   <CardBody className="grid place-items-center relative" id="camera-container">
+                    {isPhotoLoading && (
+                      <div className="absolute inset-0 grid place-items-center bg-black/50">
+                        <Spinner
+                          size="lg"
+                          classNames={{ circle1: "border-b-emerald-500", circle2: "border-b-emerald-500" }}
+                        />
+                      </div>
+                    )}
+                    {photoData && (
+                      <img
+                        src={photoData.image}
+                        alt="Foto del vehículo"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    )}
                     <video
                       id="camera"
                       className={`absolute inset-0 w-full h-full object-cover duration-300 ${isCameraLoaded ? "opacity-100" : "opacity-0"}`}
