@@ -16,6 +16,7 @@ import type {
 import type * as auth from "../auth.js";
 import type * as files from "../files.js";
 import type * as http from "../http.js";
+import type * as parking_history from "../parking_history.js";
 import type * as parking_lots from "../parking_lots.js";
 import type * as user from "../user.js";
 
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   files: typeof files;
   http: typeof http;
+  parking_history: typeof parking_history;
   parking_lots: typeof parking_lots;
   user: typeof user;
 }>;

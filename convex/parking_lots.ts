@@ -1,3 +1,4 @@
+import { Doc } from "./_generated/dataModel.d";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
@@ -58,5 +59,107 @@ export const setParkingLotStatus = mutation({
         plate: args.plate,
       });
     }
+  },
+});
+
+export const test = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("parking_lot").collect();
+  },
+});
+
+export const searchParkingLot = query({
+  args: {
+    query: v.string(),
+  },
+  handler: async (ctx, args) => {
+    if (/T\d{1}-\d{3,4}/g.test(args.query)) {
+      const client = await ctx.db
+        .query("clients")
+        .filter((q) => q.eq(q.field("department"), args.query))
+        .unique();
+      if (!client) {
+        return {
+          data: [],
+          error: "Departamento sin estacionamiento",
+        };
+      }
+      if (typeof client.parking_lot === "string") {
+        const lot = await ctx.db.get(client.parking_lot);
+        return {
+          data: [{ ...lot, owner: client }],
+          error: null,
+        };
+      } else {
+        return {
+          data: { ...Promise.all(client.parking_lot.map((lot) => ctx.db.get(lot))), owner: client },
+          error: null,
+        };
+      }
+    }
+    if (/E-\d{1,3}/g.test(args.query)) {
+      const lot = await ctx.db
+        .query("parking_lot")
+        .filter((q) => q.and(q.eq(q.field("type"), "CAR"), q.eq(q.field("number"), parseInt(args.query.split("-")[1]))))
+        .unique();
+      if (!lot) {
+        return {
+          data: [],
+          error: "No se encontró el estacionamiento",
+        };
+      }
+      return {
+        data: [{ ...lot, owner: null }],
+        error: null,
+      };
+    }
+    if (/EM-\d{1,3}/g.test(args.query)) {
+      const lot = await ctx.db
+        .query("parking_lot")
+        .filter((q) =>
+          q.and(q.eq(q.field("type"), "BIKE"), q.eq(q.field("number"), parseInt(args.query.split("-")[1]))),
+        )
+        .unique();
+      if (!lot) {
+        return {
+          data: [],
+          error: "No se encontró el estacionamiento",
+        };
+      }
+      return {
+        data: [{ ...lot, owner: null }],
+        error: null,
+      };
+    }
+
+    const clients = await ctx.db.query("clients").collect();
+    const regex = new RegExp(`.*${args.query.toLowerCase()}.*`, "g");
+
+    const filteredClients = clients.filter((client) => !!client.name.toLowerCase().match(regex));
+
+    if (filteredClients.length === 0) {
+      return {
+        data: [],
+        error: "No se encontraron propietarios",
+      };
+    }
+
+    let data: (Doc<"parking_lot"> & { owner: Doc<"clients"> | null })[] = [];
+
+    for (const client of filteredClients) {
+      if (typeof client.parking_lot === "string") {
+        const lot = await ctx.db.get(client.parking_lot);
+        data.push({ ...lot!, owner: client });
+      } else {
+        const lots = await Promise.all(client.parking_lot.map((lot) => ctx.db.get(lot)));
+        data.push(...lots!.map((lot) => ({ ...lot!, owner: client })));
+      }
+    }
+
+    return {
+      data,
+      error: null,
+    };
   },
 });

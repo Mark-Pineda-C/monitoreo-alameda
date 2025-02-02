@@ -26,8 +26,10 @@ export default defineSchema({
     .index("by_status", ["status"]),
   clients: defineTable({
     name: v.string(),
-    plate: v.string(),
-    avatar: v.id("_storage"),
+    department: v.string(),
+    plate: v.optional(v.string()),
+    avatar: v.optional(v.id("_storage")),
+    parking_lot: v.union(v.id("parking_lot"), v.array(v.id("parking_lot"))),
   }).index("by_plate", ["plate"]),
   parking_history: defineTable({
     parking_lot: v.id("parking_lot"),
