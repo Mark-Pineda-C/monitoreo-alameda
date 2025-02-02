@@ -62,13 +62,6 @@ export const setParkingLotStatus = mutation({
   },
 });
 
-export const test = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("parking_lot").collect();
-  },
-});
-
 export const searchParkingLot = query({
   args: {
     query: v.string(),
