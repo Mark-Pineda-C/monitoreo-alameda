@@ -22,6 +22,7 @@ export default defineSchema({
   })
     .index("by_number", ["number"])
     .index("by_type", ["type"])
+    .index("by_number_type", ["type", "number"])
     .index("by_department", ["department"])
     .index("by_status", ["status"]),
   clients: defineTable({

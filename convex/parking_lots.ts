@@ -160,10 +160,21 @@ export const searchParkingLot = query({
 export const listParkingLotForPdf = query({
   args: {},
   handler: async (ctx) => {
-    const lots = await ctx.db.query("parking_lot").collect();
+    const carLots = await ctx.db
+      .query("parking_lot")
+      .withIndex("by_number_type", (q) => q.eq("type", "CAR").gte("number", 1))
+      .order("asc")
+      .collect();
+    const bikeLots = await ctx.db
+      .query("parking_lot")
+      .withIndex("by_number_type", (q) => q.eq("type", "BIKE").gte("number", 1))
+      .order("asc")
+      .collect();
+    const lots = [...carLots, ...bikeLots];
     return Promise.all(
       lots.map(async (lot) => ({
         ...lot,
+
         defined_client: lot.defined_client ? await ctx.db.get(lot.defined_client) : null,
         current: {
           ...lot.current,
