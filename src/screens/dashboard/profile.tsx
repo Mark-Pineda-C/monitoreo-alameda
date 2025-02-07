@@ -17,9 +17,7 @@ export function Profile() {
               </CardHeader>
               <CardBody className="p-0">
                 {lot.defined_client ? (
-                  <p className="text-sm line-clamp-1 w-1/2">
-                    {lot.defined_client?.department} - {lot.defined_client?.name}
-                  </p>
+                  <p className="text-sm line-clamp-1 w-1/2">{lot.defined_client?.department}</p>
                 ) : (
                   <p className="text-sm line-clamp-1 w-1/2">BESCO</p>
                 )}

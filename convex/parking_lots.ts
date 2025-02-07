@@ -173,3 +173,23 @@ export const listParkingLotForPdf = query({
     );
   },
 });
+
+export const test = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const clients = await ctx.db.query("clients").collect();
+    for (const client of clients) {
+      if (typeof client.parking_lot === "string") {
+        const lot = await ctx.db.get(client.parking_lot);
+        if (!lot) throw new Error("Parking lot not found");
+        await ctx.db.patch(lot._id, { defined_client: client._id });
+      } else {
+        for (const lot of client.parking_lot) {
+          const parkingLot = await ctx.db.get(lot);
+          if (!parkingLot) throw new Error("Parking lot not found");
+          await ctx.db.patch(parkingLot._id, { defined_client: client._id });
+        }
+      }
+    }
+  },
+});
