@@ -24,7 +24,13 @@ export function Profile() {
                 {lot.current?.plate && <p>{lot.current?.plate}</p>}
               </CardBody>
               {lot.current?.photo && (
-                <img src={lot.current.photo} alt="photo" className="absolute top-0 right-0 w-1/2 h-full object-cover" />
+                <img
+                  src={lot.current.photo}
+                  alt="photo"
+                  className="absolute top-0 right-0 w-1/2 h-full object-cover"
+                  width={300}
+                  height={200}
+                />
               )}
             </Card>
           ))}
